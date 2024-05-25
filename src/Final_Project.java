@@ -24,10 +24,9 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
     public static BufferedImage cloudBottom;
     public static BufferedImage house;
     public static BufferedImage sidePanel;
+    public static BufferedImage selection;
+    public static BufferedImage horizontalRoad;
     public static int dialogue;
-    public static int trexIndex;
-    public static int trexX;
-    public static int trexY;
     public static int gameState;
     public static int lastGameState;
     public static int mainscreenX;
@@ -38,19 +37,15 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
     public static int buttonPressed;
     public static boolean isJumping;
     public static boolean returningHome;
+    public static int[][] buildingType = new int[24][17];
     
-    public static boolean leftUnlocked;
-    public static boolean topUnlocked;
-    public static boolean rightUnlocked;
-    public static boolean bottomUnlocked;
+    
+    public static boolean[] cloudsUnlocked = {false, false, false, false};
     
     public static boolean sidePanelOpen;
     
     public static void reset() {
     	dialogue = 1;
-        trexIndex = 0;
-        trexX = 0;
-        trexY = 0;
         gameState = 0;
         lastGameState = 0;
         mainscreenX = 0;
@@ -60,10 +55,16 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         gravity = 2;
         buttonPressed = 0;
         
-        leftUnlocked = false;
-        topUnlocked = false;
-        rightUnlocked = false;
-        bottomUnlocked = false;
+        cloudsUnlocked[0] = false;
+        cloudsUnlocked[1] = false;
+        cloudsUnlocked[2] = false;
+        cloudsUnlocked[3] = false;
+        
+        buildingType[15][10] = 2;
+        
+        for(int i = 0; i<24;i++) {
+        	buildingType[i][11] = 3;
+        }
         
         sidePanelOpen = false;
     }
@@ -109,12 +110,12 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	        	gameState = 1;
 	        }
 	
-	        g.drawImage(background, trexX, trexY, null);
+	        g.drawImage(background, 0, 0, null);
 	        g.drawImage(screen, 0, mainscreenY, null);
         }
         
         else if(gameState == 1) {
-        	g.drawImage(background, trexX, trexY, null);
+        	g.drawImage(background, 0, 0, null);
         	g.drawImage(screen, 0, mainscreenY, null);
         	if(lastGameState == 3) {
         		g.drawImage(background, mainscreenX, 0, null);
@@ -154,7 +155,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	        	g.drawImage(cloudRight, mainscreenX+960, mainscreenY, null);
 	        	g.drawImage(cloudBottom, mainscreenX+960, mainscreenY, null);
 	        	g.drawImage(menubar, mainscreenX+960, mainscreenY, null);
-	        	g.drawImage(house, mainscreenX+1360, mainscreenY+400, null);
+	        	
 	        	
 	        	if(mainscreenX <0) {
 		        	mainscreenX += 40;
@@ -170,13 +171,21 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	        	g.drawImage(background, mainscreenX, 0, null);
 	        	g.drawImage(screen, mainscreenX, 0, null);
 	        	g.drawImage(grass, mainscreenX+960, 0, null);
+	        	for(int i = 0; i < 24; i++) {
+	        		for(int ii = 0; ii < 17; ii++) {
+	        			if(buildingType[i][ii] == 2) {
+	        				g.drawImage(house, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
+	        			}
+	        			if(buildingType[i][ii] == 3) {
+	        				g.drawImage(horizontalRoad, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
+	        			}
+	        		}
+	        	}
 	        	g.drawImage(cloudLeft, mainscreenX+960, 0, null);
 	        	g.drawImage(cloudTop, mainscreenX+960, 0, null);
 	        	g.drawImage(cloudRight, mainscreenX+960, 0, null);
 	        	g.drawImage(cloudBottom, mainscreenX+960, 0, null);
 	        	g.drawImage(menubar, mainscreenX+960, 0, null);
-	        	g.drawImage(house, mainscreenX+1360, 400, null);
-	        	
 	        	if(mainscreenX >-960) {
 		        	mainscreenX -= 30;
 		        }
@@ -188,13 +197,22 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         		g.drawImage(background, 0, 0, null);
 	        	g.drawImage(screen, mainscreenX, mainscreenY, null);
 	        	g.drawImage(grass, mainscreenX+960, mainscreenY, null);
+	        	for(int i = 0; i < 24; i++) {
+	        		for(int ii = 0; ii < 17; ii++) {
+	        			if(buildingType[i][ii] == 2) {
+	        				g.drawImage(house, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
+	        			}
+	        			if(buildingType[i][ii] == 3) {
+	        				g.drawImage(horizontalRoad, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
+	        			}
+	        		}
+	        	}
 	        	g.drawImage(dialogue0, mainscreenX, mainscreenY-718, null);
 	        	g.drawImage(cloudLeft, mainscreenX+960, mainscreenY, null);
 	        	g.drawImage(cloudTop, mainscreenX+960, mainscreenY, null);
 	        	g.drawImage(cloudRight, mainscreenX+960, mainscreenY, null);
 	        	g.drawImage(cloudBottom, mainscreenX+960, mainscreenY, null);
 	        	g.drawImage(menubar, mainscreenX+960, mainscreenY, null);
-	        	g.drawImage(house, mainscreenX+1360, mainscreenY+400, null);
 	        	
 	        	if(mainscreenX >-960) {
 		        	mainscreenX -= 40;
@@ -247,6 +265,8 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         cloudBottom = ImageIO.read(new File("cloud4.png"));
         house = ImageIO.read(new File("house.png"));
         sidePanel = ImageIO.read(new File("sidePanel.png"));
+        selection = ImageIO.read(new File("selection.png"));
+        horizontalRoad = ImageIO.read(new File("roadHorizontal.png"));
 
         while(true) {
         	if(storylineState != 1) {
@@ -386,6 +406,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         while(true){
             // sleep
             try{Thread.sleep(16);}// orig 20
+            //62.5fps
             catch(Exception e){}
 
             // 2) Drawing screen
