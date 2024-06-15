@@ -27,6 +27,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
     public static BufferedImage sidePanel;
     public static BufferedImage selection;
     public static BufferedImage horizontalRoad;
+    public static BufferedImage verticalRoad;
     public static BufferedImage emptyPlot;
     public static BufferedImage townHall;
     public static BufferedImage tornado;
@@ -265,6 +266,9 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	        			if(buildingType[i][ii] == 3) {//Horizontal Road
 	        				g.drawImage(horizontalRoad, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
 	        			}
+	        			if(buildingType[i][ii] == 4) {//Vertical Road
+	        				g.drawImage(verticalRoad, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
+	        			}
 	        			if(buildingType[i][ii] == 7) {//Coffee Shop
 	        				g.drawImage(coffeeShop, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
 	        			}
@@ -437,6 +441,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         sidePanel = ImageIO.read(new File("sidePanel.png"));
         selection = ImageIO.read(new File("selection.png"));
         horizontalRoad = ImageIO.read(new File("roadHorizontal.png"));
+        verticalRoad = ImageIO.read(new File("roadVertical.png"));
         emptyPlot = ImageIO.read(new File("emptyPlot.png"));
         lockedArea = ImageIO.read(new File("lockedArea.png"));
         townHall = ImageIO.read(new File("townhall.png"));
@@ -617,6 +622,31 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	    						}
 	    					}
 	    					countGDP();
+	    					
+	    					//IF THEY CLICK TO BUY A HORIZONTAL ROAD
+	    					if(e.getX() >= 709 && e.getX() <=756 && e.getY() >= 235 && e.getY() <= 322 && e.getButton()==1) {
+	    						if(money >= 200) {
+		    						buildingType[lastxPressed][lastyPressed] = 3;
+		    						sidePanelOpen = false;
+		    						money -= 200;
+	    						}
+	    						else {
+	    							System.out.println("no money");
+	    						}
+	    					}
+	    					
+	    					//IF THEY CLICK TO BUY A VERTICAL ROAD
+	    					if(e.getX() >= 780 && e.getX() <=852 && e.getY() >= 235 && e.getY() <= 322 && e.getButton()==1) {
+	    						if(money >= 200) {
+		    						buildingType[lastxPressed][lastyPressed] = 4;
+		    						sidePanelOpen = false;
+		    						money -= 200;
+	    						}
+	    						else {
+	    							System.out.println("no money");
+	    						}
+	    					}
+	    					countGDP();
 	    				}
 	    				else if(buildingType[lastxPressed][lastyPressed] == 1) {
 	    					//IF THEY CLICK TO UNLOCK
@@ -703,7 +733,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	
 	public static void naturalDisaster() {
 		buildingType[tornadox][tornadoy] = 9;
-		if(Math.random()>0.001 && Math.random()>0.9 && !tornadoActive && gameState == 3) {
+		if(Math.random()>0.001 && Math.random()>0.99 && !tornadoActive && gameState == 3) {
 			tornadoActive = true;
 			tornado();
 		}
