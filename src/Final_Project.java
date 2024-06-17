@@ -22,17 +22,13 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
     public static BufferedImage cloudTop;
     public static BufferedImage cloudRight;
     public static BufferedImage cloudBottom;
-    public static BufferedImage house;
-    public static BufferedImage coffeeShop;
     public static BufferedImage sidePanel;
     public static BufferedImage selection;
-    public static BufferedImage horizontalRoad;
-    public static BufferedImage verticalRoad;
-    public static BufferedImage emptyPlot;
-    public static BufferedImage townHall;
-    public static BufferedImage tornado;
+    public static BufferedImage emptyPlotSelection;
     public static BufferedImage lockedArea;
+    public static BufferedImage[] buildings = new BufferedImage[60];
     public static BufferedImage[] numbers = new BufferedImage[10];
+    public static BufferedImage[] sidePanelSelection = new BufferedImage[60];
     public static int dialogue;
     public static int gameState;
     public static int lastGameState;
@@ -88,7 +84,10 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         	}
         }
         
+        buildingType[10][10] = 42;
         buildingType[15][10] = 2;
+        buildingType[13][10] = 52;
+        buildingType[14][10] = 57;
         
         for(int i = 0; i<24;i++) {
         	buildingType[i][11] = 3;
@@ -221,12 +220,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	        	g.drawImage(grass, mainscreenX+960, 0, null);
 	        	for(int i = 0; i < 24; i++) {
 	        		for(int ii = 0; ii < 17; ii++) {
-	        			if(buildingType[i][ii] == 2) {
-	        				g.drawImage(house, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
-	        			}
-	        			if(buildingType[i][ii] == 3) {
-	        				g.drawImage(horizontalRoad, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
-	        			}
+	        			g.drawImage(buildings[buildingType[i][ii]], mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
 	        		}
 	        	}
 	        	if(cloudsUnlocked[0] == false) {
@@ -254,31 +248,11 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	        	g.drawImage(screen, mainscreenX, mainscreenY, null);
 	        	g.drawImage(grass, mainscreenX+960, mainscreenY, null);
 	        	
-	        	if(sidePanelOpen) {
-	        		g.drawImage(selection, mainscreenX+960+(lastxPressed*40), mainscreenY+(lastyPressed*40), null);
-	        	}
+	        	
 	        	//Spawning the buildings
 	        	for(int i = 0; i < 24; i++) {
 	        		for(int ii = 0; ii < 17; ii++) {
-	        			if(buildingType[i][ii] == 2) {//House
-	        				g.drawImage(house, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
-	        			}
-	        			if(buildingType[i][ii] == 3) {//Horizontal Road
-	        				g.drawImage(horizontalRoad, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
-	        			}
-	        			if(buildingType[i][ii] == 4) {//Vertical Road
-	        				g.drawImage(verticalRoad, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
-	        			}
-	        			if(buildingType[i][ii] == 7) {//Coffee Shop
-	        				g.drawImage(coffeeShop, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
-	        			}
-	        			if(buildingType[i][ii] == 8) {//Town Hall
-	        				g.drawImage(townHall, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
-	        			}
-	        			if(buildingType[i][ii] == 9) {//Tornado
-	        				g.drawImage(tornado, mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
-	        			}//change to array bufferedimage to remove the if statements later!!!!!
-	        			
+	        			g.drawImage(buildings[buildingType[i][ii]], mainscreenX+960+(i*40), mainscreenY+(ii*40), null);
 	        		}
 	        	}
 	        	g.drawImage(dialogue0, mainscreenX, mainscreenY-718, null);
@@ -295,6 +269,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	        		g.drawImage(cloudLeft, mainscreenX+960, mainscreenY, null);
 	        	}
 	        	g.drawImage(menubar, mainscreenX+960, mainscreenY, null);
+	        	
 	        	
 	        	if(mainscreenX >-960) {
 		        	mainscreenX -= 40;
@@ -383,22 +358,10 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         	}
         	
         	if(sidePanelOpen) {
+        		g.drawImage(selection, mainscreenX+960+(lastxPressed*40), mainscreenY+(lastyPressed*40), null);
         		g.drawImage(sidePanel, 0, 0, null);
-    			if(buildingType[xPressed][yPressed] == 0) {//if empty
-    				g.drawImage(emptyPlot, 0, 0, null);
-    			}
-    			if(buildingType[xPressed][yPressed] == 1) {//if locked under cloud
-    				g.drawImage(lockedArea, 0, 0, null);
-    			}
-        		if(buildingType[xPressed][yPressed] == 2) {//if house
-        			g.drawImage(house, 700, 100, null);
-        		}
-        		else if(buildingType[xPressed][yPressed] == 3) {//if horizontal road
-        			g.drawImage(horizontalRoad, 700, 100, null);
-        		}
-        		else if(buildingType[xPressed][yPressed] == 7) {//if coffee shop
-        			g.drawImage(coffeeShop, 700, 100, null);
-        		}
+        		g.drawImage(buildings[buildingType[xPressed][yPressed]], 700, 30, null);
+        		g.drawImage(sidePanelSelection[buildingType[xPressed][yPressed]], 0, 0, null);
         	
         }
         else if(gameState == 5) {//Credits
@@ -436,16 +399,28 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         cloudTop = ImageIO.read(new File("cloud2.png"));
         cloudRight = ImageIO.read(new File("cloud3.png"));
         cloudBottom = ImageIO.read(new File("cloud4.png"));
-        house = ImageIO.read(new File("house.png"));
-        coffeeShop = ImageIO.read(new File("coffee.png"));
+        buildings[2] = ImageIO.read(new File("house.png"));
+        buildings[7] = ImageIO.read(new File("coffee.png"));
         sidePanel = ImageIO.read(new File("sidePanel.png"));
         selection = ImageIO.read(new File("selection.png"));
-        horizontalRoad = ImageIO.read(new File("roadHorizontal.png"));
-        verticalRoad = ImageIO.read(new File("roadVertical.png"));
-        emptyPlot = ImageIO.read(new File("emptyPlot.png"));
+        buildings[3] = ImageIO.read(new File("roadHorizontal.png"));
+        buildings[4] = ImageIO.read(new File("roadVertical.png"));
         lockedArea = ImageIO.read(new File("lockedArea.png"));
-        townHall = ImageIO.read(new File("townhall.png"));
-        tornado = ImageIO.read(new File("tornado.png"));
+        buildings[8] = ImageIO.read(new File("townhall.png"));
+        buildings[9] = ImageIO.read(new File("tornado.png"));
+        buildings[22] = ImageIO.read(new File("reinforcedHouse.png"));
+        buildings[27] = ImageIO.read(new File("reinforcedCoffeeShop.png"));
+        buildings[42] = ImageIO.read(new File("house.png"));//kailynsHouse
+        buildings[52] = ImageIO.read(new File("houseAbandoned.png"));
+        buildings[57] = ImageIO.read(new File("coffeeShopAbandoned.png"));
+        sidePanelSelection[0] = ImageIO.read(new File("emptyPanel.png"));
+        sidePanelSelection[2] = ImageIO.read(new File("housePanel.png"));
+        sidePanelSelection[7] = ImageIO.read(new File("coffeeShopPanel.png"));
+        sidePanelSelection[22] = ImageIO.read(new File("reinforcedHousePanel.png"));
+        sidePanelSelection[27] = ImageIO.read(new File("reinforcedCoffeeShopPanel.png"));
+        sidePanelSelection[42] = ImageIO.read(new File("kailynsHouse.png"));
+        sidePanelSelection[52] = ImageIO.read(new File("abandonedHousePanel.png"));
+        sidePanelSelection[57] = ImageIO.read(new File("coffeeShopAbandonedPanel.png"));
         numbers[0] = ImageIO.read(new File("zero.png"));
         numbers[1] = ImageIO.read(new File("one.png"));
         numbers[2] = ImageIO.read(new File("two.png"));
@@ -586,6 +561,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	            if(sidePanelOpen==true) {
 	            	//Clicking things in the side panel
 	    			if(sidePanelOpen) {
+	    				//EMPTY PANEL
 	    				if(buildingType[lastxPressed][lastyPressed] == 0) {
 	    					//IF THEY CLICK TO BUY A HOUSE
 	    					if(e.getX() >= 709 && e.getX() <=756 && e.getY() >= 132 && e.getY() <= 213 && e.getButton()==1) {
@@ -648,6 +624,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	    					}
 	    					countGDP();
 	    				}
+	    				//CLOUDS PANEL
 	    				else if(buildingType[lastxPressed][lastyPressed] == 1) {
 	    					//IF THEY CLICK TO UNLOCK
 	    					if(e.getX() >= 709 && e.getX() <=930 && e.getY() >= 132 && e.getY() <= 213 && e.getButton()==1) {
@@ -665,6 +642,47 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	    						else {
 	    							System.out.println("no money");
 	    						}
+	    					}
+	    				}
+	    				//ABANDONED PANEL
+	    				else if(buildingType[lastxPressed][lastyPressed] > 50) {
+	    					//Refurbish
+	    					if(e.getX() >= 696 && e.getX() <=809 && e.getY() >= 432 && e.getY() <= 480 && e.getButton()==1) {
+	    						if(money >= 500) {
+	    							buildingType[lastxPressed][lastyPressed] -= 50;
+		    						sidePanelOpen = false;
+		    						money -= 500;
+	    						}
+	    						else {
+	    							System.out.println("no money");
+	    						}
+	    					}
+	    					//Demolish
+	    					else if(e.getX() >= 815 && e.getX() <=925 && e.getY() >= 432 && e.getY() <= 480 && e.getButton()==1) {
+    							buildingType[lastxPressed][lastyPressed] = 0;
+	    						sidePanelOpen = false;
+	    						money += 50;
+	    					}
+	    				}
+	    				
+	    				//House or Coffee Shop
+	    				else if(buildingType[lastxPressed][lastyPressed] == 2 || buildingType[lastxPressed][lastyPressed] == 7){
+	    					//Refurbish
+	    					if(e.getX() >= 696 && e.getX() <=809 && e.getY() >= 432 && e.getY() <= 480 && e.getButton()==1) {
+	    						if(money >= 1000) {
+	    							buildingType[lastxPressed][lastyPressed] += 20;
+		    						sidePanelOpen = false;
+		    						money -= 1000;
+	    						}
+	    						else {
+	    							System.out.println("no money");
+	    						}
+	    					}
+	    					//Demolish
+	    					else if(e.getX() >= 815 && e.getX() <=925 && e.getY() >= 432 && e.getY() <= 480 && e.getButton()==1) {
+    							buildingType[lastxPressed][lastyPressed] = 0;
+	    						sidePanelOpen = false;
+	    						money += 100;
 	    					}
 	    				}
 	    			}
@@ -720,6 +738,15 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
             	if(buildingType[i][ii] == 8) {
             		gdp += 10000;
             	}
+            	if(buildingType[i][ii] == 42) {
+            		gdp += 2000;
+            	}
+            	if(buildingType[i][ii] == 52) {
+            		gdp += 500;
+            	}
+            	if(buildingType[i][ii] == 57) {
+            		gdp += 500;
+            	}
             }
         }
         
@@ -733,7 +760,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	
 	public static void naturalDisaster() {
 		buildingType[tornadox][tornadoy] = 9;
-		if(Math.random()>0.001 && Math.random()>0.99 && !tornadoActive && gameState == 3) {
+		if(Math.random()>0.001 && Math.random()>0.995 && !tornadoActive && gameState == 3) {
 			tornadoActive = true;
 			tornado();
 		}
@@ -745,6 +772,8 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 		int tornadox = (int) Math.round(Math.random()*23);
 		int tornadoy = (int) Math.round(Math.random()*16);
 		int tornadoDirection = (int)Math.round(Math.random()*4);
+		boolean destroy = false;
+		int lastBuildingType = 0;
 		System.out.println(tornadoDirection);
 		countGDP();
 		buildingType[tornadox][tornadoy] = 9;
@@ -758,22 +787,45 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 			if(movement==2 && tornadox > 0) {
 				tornadox -= 1;
 				buildingType[tornadox+1][tornadoy] = 0;
+				if(!destroy) {
+					buildingType[tornadox+1][tornadoy] = lastBuildingType;
+				}
+				lastBuildingType = buildingType[tornadox][tornadoy];
 				buildingType[tornadox][tornadoy] = 9;
 			}
 			else if(movement == 3 && tornadox < 24) {
 				tornadox += 1;
 				buildingType[tornadox-1][tornadoy] = 0;
+				if(!destroy) {
+					buildingType[tornadox-1][tornadoy] = lastBuildingType;
+				}
+				lastBuildingType = buildingType[tornadox][tornadoy];
 				buildingType[tornadox][tornadoy] = 9;
 			}
 			else if(movement == 4 && tornadoy > 0) {
 				tornadoy -= 1;
 				buildingType[tornadox][tornadoy+1] = 0;
+				if(!destroy) {
+					buildingType[tornadox][tornadoy+1] = lastBuildingType;
+				}
+				lastBuildingType = buildingType[tornadox][tornadoy];
 				buildingType[tornadox][tornadoy] = 9;
 			}
 			else if(movement == 5 && tornadoy < 17) {
 				tornadoy += 1;
 				buildingType[tornadox][tornadoy-1] = 0;
+				if(!destroy) {
+					buildingType[tornadox][tornadoy-1] = lastBuildingType;
+				}
+				lastBuildingType = buildingType[tornadox][tornadoy];
 				buildingType[tornadox][tornadoy] = 9;
+			}
+			
+			if(lastBuildingType == 1 || Math.random()<0.5) {
+				destroy = false;
+			}
+			else {
+				destroy = true;
 			}
 			//Cancel Tornado
 			if(tornadox<=0 || tornadox == 24 || tornadoy <= 0 || tornadoy == 17) {
