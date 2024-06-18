@@ -7,7 +7,7 @@ import java.awt.event.*;
 import java.util.Scanner;
 
 
-public class Final_Project extends JPanel implements KeyListener, Runnable, MouseListener{
+public class Final_Project extends JPanel implements Runnable, MouseListener{
     // Game Stats
     public static BufferedImage background;
     public static BufferedImage blurredBackground;
@@ -26,16 +26,17 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
     public static BufferedImage selection;
     public static BufferedImage emptyPlotSelection;
     public static BufferedImage lockedArea;
+    public static BufferedImage[] instructions = new BufferedImage[6];
     public static BufferedImage[] buildings = new BufferedImage[60];
     public static BufferedImage[] numbers = new BufferedImage[10];
     public static BufferedImage[] sidePanelSelection = new BufferedImage[60];
     public static int dialogue;
+    public static int instructionStep;
     public static int gameState;
     public static int lastGameState;
     public static int mainscreenX;
     public static int mainscreenY;
     public static int storylineState;
-    public static int gravity;
     public static int buttonPressed;
     public static int xPressed;
     public static int yPressed;
@@ -46,26 +47,26 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
     public static int population;
     public static int tornadox;
     public static int tornadoy;
-    public static boolean isJumping;
-    public static boolean returningHome;
     public static boolean tornadoActive;
     public static int[][] buildingType = new int[25][18];
     
     
+    
     public static boolean[] cloudsUnlocked = {false, false, false, false};
+    
     
     public static boolean sidePanelOpen;
     
     public static void reset() {
+
     	dialogue = 1;
         gameState = 0;
         lastGameState = 0;
         mainscreenX = 0;
         mainscreenY = 802;
         storylineState = 0;
-        gravity = 2;
         buttonPressed = 0;
-        money = 134567;
+        money = 10000;
         population = 10;
         
         cloudsUnlocked[0] = false;
@@ -93,9 +94,76 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         	buildingType[i][11] = 3;
         }
         
-        sidePanelOpen = false;
+        
         tornadox = 0;
         tornadoy = 0;
+        sidePanelOpen = false;
+    }
+    
+    public static void save() throws IOException {
+    	
+		PrintWriter outputFile = new PrintWriter(new FileWriter("save.txt"));
+    	
+    	outputFile.println(dialogue);
+    	outputFile.println(gameState);
+    	outputFile.println(mainscreenX);
+    	outputFile.println(mainscreenY);
+    	outputFile.println(storylineState);
+    	outputFile.println(buttonPressed);
+    	outputFile.println(money);
+    	outputFile.println(population);
+    	outputFile.println(cloudsUnlocked[0]);
+    	outputFile.println(cloudsUnlocked[1]);
+    	outputFile.println(cloudsUnlocked[2]);
+    	outputFile.println(cloudsUnlocked[3]);
+    	
+        
+        
+        //Set initial map of empty and locked area
+        
+        for(int i = 0; i<24;i++) {
+        	for(int ii = 0; ii<17; ii++) {
+        		if(buildingType[i][ii] == 9) {
+        			outputFile.println(0);
+        		}
+        		else {
+        			outputFile.println(buildingType[i][ii]);
+        		}
+        		
+        	}
+        }
+        
+        outputFile.println(tornadox);
+        outputFile.println(tornadoy);
+        System.out.println("Save complete");
+        outputFile.close();
+    }
+    
+    public static void load() throws IOException {
+		Scanner inputFile = new Scanner(new File("save.txt"));
+    	
+		dialogue = inputFile.nextInt();
+		gameState = inputFile.nextInt();
+		mainscreenX = inputFile.nextInt();
+		mainscreenY = inputFile.nextInt();
+		storylineState = inputFile.nextInt();
+		buttonPressed = inputFile.nextInt();
+		money = inputFile.nextInt();
+		population = inputFile.nextInt();
+		for (int i = 0; i < 4; i++) {
+	        cloudsUnlocked[i] = inputFile.next().equals("true");
+	    }
+
+		for(int i = 0; i<24;i++) {
+        	for(int ii = 0; ii<17; ii++) {
+        		buildingType[i][ii] = inputFile.nextInt();
+        	}
+        }
+        
+		tornadox = inputFile.nextInt();
+		tornadoy = inputFile.nextInt();
+        System.out.println("Load complete");
+        inputFile.close();
     }
     
 
@@ -103,7 +171,6 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
     public Final_Project(){
         setPreferredSize(new Dimension(960, 718));
         this.setFocusable(true);
-        addKeyListener(this);
         Thread thread = new Thread(this);
         thread.start();
         addMouseListener(this);
@@ -236,12 +303,6 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	        		g.drawImage(cloudLeft, mainscreenX+960, mainscreenY, null);
 	        	}
 	        	g.drawImage(menubar, mainscreenX+960, 0, null);
-	        	//if(mainscreenX >-960) {
-		        //	mainscreenX -= 30;
-		        //}
-	        	//else {
-	        	//	mainscreenX=-960;
-	        	//}
         	}
         	
         		g.drawImage(background, 0, 0, null);
@@ -367,11 +428,15 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         else if(gameState == 5) {//Credits
         	g.drawImage(blurredBackground, 0, 0, null);
         	g.drawImage(credit, 0, 0, null);
-        	System.out.println("Credits open");
         }
         else if(gameState == 6) {//Reset
         	g.drawImage(blurredBackground, 0, 0, null);
         	g.drawImage(reset, 0, 0, null);
+        }
+        	
+        else if(gameState == 7) {//Instructions
+        	g.drawImage(instructions[instructionStep], 0, 0, null);
+        	
         }
         
         if(buttonPressed > 0) {
@@ -379,8 +444,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         }
     }
     public static void main(String[] args) throws IOException{
-    	Scanner inputFile = new Scanner(new File("stats.txt"));
-		PrintWriter outputFile = new PrintWriter(new FileWriter("stats.txt"));
+    	
     	reset();
 
         JFrame frame = new JFrame("KailynDingVille City Builder");
@@ -408,12 +472,14 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         lockedArea = ImageIO.read(new File("lockedArea.png"));
         buildings[8] = ImageIO.read(new File("townhall.png"));
         buildings[9] = ImageIO.read(new File("tornado.png"));
+        buildings[10] = ImageIO.read(new File("tornadoWall.png"));
         buildings[22] = ImageIO.read(new File("reinforcedHouse.png"));
         buildings[27] = ImageIO.read(new File("reinforcedCoffeeShop.png"));
         buildings[42] = ImageIO.read(new File("house.png"));//kailynsHouse
         buildings[52] = ImageIO.read(new File("houseAbandoned.png"));
         buildings[57] = ImageIO.read(new File("coffeeShopAbandoned.png"));
         sidePanelSelection[0] = ImageIO.read(new File("emptyPanel.png"));
+        sidePanelSelection[1] = ImageIO.read(new File("lockedArea.png"));
         sidePanelSelection[2] = ImageIO.read(new File("housePanel.png"));
         sidePanelSelection[7] = ImageIO.read(new File("coffeeShopPanel.png"));
         sidePanelSelection[22] = ImageIO.read(new File("reinforcedHousePanel.png"));
@@ -431,6 +497,12 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         numbers[7] = ImageIO.read(new File("seven.png"));
         numbers[8] = ImageIO.read(new File("eight.png"));
         numbers[9] = ImageIO.read(new File("nine.png"));
+        instructions[0] = ImageIO.read(new File("instruction1.png"));
+        instructions[1] = ImageIO.read(new File("instruction2.png"));
+        instructions[2] = ImageIO.read(new File("instruction3.png"));
+        instructions[3] = ImageIO.read(new File("instruction4.png"));
+        instructions[4] = ImageIO.read(new File("instruction5.png"));
+        instructions[5] = ImageIO.read(new File("instruction6.png"));
 
         while(true) {
         	if(storylineState != 1) {
@@ -442,40 +514,17 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         	}
         	countGDP();
         	naturalDisaster();
-        	//if(!sidePanelOpen) {
-        	//	lastxPressed = 0;
-            //    lastyPressed = 0;
-        	//}
         	
-        	//System.out.println(storylineState);
         }
     }
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode()==32){
-            isJumping = true;
-            
-        }
-    }
-
-
-    public void keyReleased(KeyEvent e) {
-
-    }
+    
     
     public void mouseClicked(MouseEvent e) {
     	
     }
-    
 	public void mousePressed(MouseEvent e) {
-		//if(gameState == 1) {
-		//	if(e.getX() >= 317 && e.getX() <=672 && e.getY() >= 314 && e.getY() <= 592 && e.getButton()==1){
-		//		
-		//	}
-		//}
+		
+		
 		if(gameState == 1) {
     		//Credits
 			if(e.getX() >= 516 && e.getX() <=672 && e.getY() >= 512 && e.getY() <= 592 && e.getButton()==1){
@@ -486,7 +535,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 				buttonPressed = 3;
 			}
 			//Instructions
-			else if(e.getX() >= 516 && e.getX() <=672 && e.getY() >= 512 && e.getY() <= 592 && e.getButton()==1){
+			else if(e.getX() >= 516 && e.getX() <=672 && e.getY() >= 389 && e.getY() <= 592 && e.getButton()==1){
 				buttonPressed = 2;
 			}
 			//Play
@@ -509,6 +558,12 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 				gameState = 6;
 				repaint();
 			}
+			//Instructions
+			else if(buttonPressed == 2 && e.getX() >= 516 && e.getX() <=672 && e.getY() >= 389 && e.getY() <= 472 && e.getButton()==1){
+				gameState = 7;
+				instructionStep = 0;
+				repaint();
+			}
 			//Play
 			else if(buttonPressed == 1 && e.getX() >= 289 && e.getX() <=456 && e.getY() >= 389 && e.getY() <= 472 && e.getButton()==1){
         		mainscreenX = 0;
@@ -517,6 +572,23 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 					gameState = 2;
 				}
 				repaint();
+			}
+			//Save
+			else if(e.getX() >= 15 && e.getX() <=88 && e.getY() >= 678 && e.getY() <= 708 && e.getButton()==1){
+        		try {
+					save();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			else if(e.getX() >= 100 && e.getX() <=173 && e.getY() >= 678 && e.getY() <= 708 && e.getButton()==1){
+        		try {
+					load();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		}
 		else if(gameState == 2) {//Dialogue
@@ -529,14 +601,31 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 			if(dialogue==6) {
 				reset();
 			}
+			if(dialogue==9) {
+				finishGame();
+			}
+			try {
+				refreshDialogue();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			repaint();
 		}
 		else if(gameState ==3) {//Game
+			if(storylineState == 5) {
+				reset();
+			}
+			addMoney();
 			if(e.getButton()==3) {
-				dialogue = 5;
-				gameState = 2;
-				lastGameState = 3;
-				storylineState = 2;
+				try {
+					lose();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				repaint();
 			}
 			else if(e.getX() >= 842 && e.getX() <=926 && e.getY() >= 14 && e.getY() <= 55 && e.getButton()==1){
 				if(!sidePanelOpen) {
@@ -623,19 +712,61 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	    						}
 	    					}
 	    					countGDP();
+	    					
+	    					//IF THEY CLICK TO BUY A TORNADO WALL
+	    					if(e.getX() >= 865 && e.getX() <= 930 && e.getY() >= 235 && e.getY() <= 322 && e.getButton()==1) {
+	    						if(money >= 20000) {
+		    						buildingType[lastxPressed][lastyPressed] = 10;
+		    						sidePanelOpen = false;
+		    						money -= 20000;
+	    						}
+	    						else {
+	    							System.out.println("no money");
+	    						}
+	    					}
+	    					countGDP();
 	    				}
 	    				//CLOUDS PANEL
 	    				else if(buildingType[lastxPressed][lastyPressed] == 1) {
 	    					//IF THEY CLICK TO UNLOCK
-	    					if(e.getX() >= 709 && e.getX() <=930 && e.getY() >= 132 && e.getY() <= 213 && e.getButton()==1) {
+	    					if(e.getX() >= 709 && e.getX() <=930 && e.getY() >= 132 && e.getY() <= 213 && e.getButton()==1) {//Panel button
 	    						if(money >= 100000) {
-	    							for(int i = 0; i<24; i++) {
-	    								for(int ii = 0; ii<3; ii++) {
-		    								buildingType[i][ii] = 0;
-	    								}
+	    							if(lastyPressed<3) {
+		    							for(int i = 0; i<24; i++) {
+		    								for(int ii = 0; ii<3; ii++) {
+			    								buildingType[i][ii] = 0;
+		    								}
+		    							}
+		    							cloudsUnlocked[0] = true;
+	    							}
+	    							else if(lastyPressed>13) {
+		    							for(int i = 0; i<24; i++) {
+		    								for(int ii = 13; ii<18; ii++) {
+			    								buildingType[i][ii] = 0;
+		    								}
+		    							}
+		    							cloudsUnlocked[2] = true;
+	    							}
+	    							
+	    							else if(lastxPressed<7) {
+		    							for(int i = 0; i<7; i++) {
+		    								for(int ii = 0; ii<18; ii++) {
+			    								buildingType[i][ii] = 0;
+		    								}
+		    							}
+		    							cloudsUnlocked[3] = true;
+	    							}
+	    							
+	    							else if(lastxPressed>20) {
+		    							for(int i = 0; i>20; i++) {
+		    								for(int ii = 0; ii<18; ii++) {
+			    								buildingType[i][ii] = 0;
+		    								}
+		    							}
+		    							cloudsUnlocked[1] = true;
 	    							}
 		    						
-	    							cloudsUnlocked[0] = true;
+	    							
 		    						sidePanelOpen = false;
 		    						money -= 100000;
 	    						}
@@ -685,6 +816,17 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	    						money += 100;
 	    					}
 	    				}
+	    				
+	    				//Reinforced House or Coffee Shop
+	    				else if(buildingType[lastxPressed][lastyPressed] == 22 || buildingType[lastxPressed][lastyPressed] == 27){
+	    					
+	    					//Demolish
+	    					if(e.getX() >= 815 && e.getX() <=925 && e.getY() >= 432 && e.getY() <= 480 && e.getButton()==1) {
+    							buildingType[lastxPressed][lastyPressed] = 0;
+	    						sidePanelOpen = false;
+	    						money += 100;
+	    					}
+	    				}
 	    			}
 	    			else if(buildingType[xPressed][yPressed] == 0){
 	    				sidePanelOpen = false;
@@ -712,6 +854,12 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 				reset();
 			}
 		}
+		else if(gameState ==7) {
+			instructionStep++;
+			if(instructionStep>5) {
+				gameState = 1;
+			}
+		}
 		buttonPressed = 0;
 	}
 	public void mouseEntered(MouseEvent e) {}
@@ -720,6 +868,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	}
 	
 	public static void countGDP(){
+		countPopulation();
 		gdp = 0;
         for(int i = 0; i<24; i++) {
         	for(int ii = 0; ii<17; ii++) {
@@ -738,6 +887,12 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
             	if(buildingType[i][ii] == 8) {
             		gdp += 10000;
             	}
+            	if(buildingType[i][ii] == 22) {
+            		gdp += 2000;
+            	}
+            	if(buildingType[i][ii] == 27) {
+            		gdp += 2000;
+            	}
             	if(buildingType[i][ii] == 42) {
             		gdp += 2000;
             	}
@@ -747,6 +902,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
             	if(buildingType[i][ii] == 57) {
             		gdp += 500;
             	}
+            	
             }
         }
         
@@ -758,9 +914,116 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
         }
 	}
 	
+	public static void lose() throws IOException {
+		dialogue = 5;
+		refreshDialogue();
+		gameState = 2;
+		lastGameState = 3;
+		storylineState = 2;
+		sidePanelOpen = false;
+		refreshDialogue();
+		
+	}
+	
+	public static void refreshDialogue() throws IOException{
+		String fileName = dialogue + ".png";
+    	dialogue0 = ImageIO.read(new File(fileName));
+	}
+	public static void countPopulation(){
+		population = 0;
+        for(int i = 0; i<24; i++) {
+        	for(int ii = 0; ii<17; ii++) {
+        		if(buildingType[i][ii] == 2) {
+            		population += 3;
+            	}
+            	if(buildingType[i][ii] == 22) {
+            		population += 5;
+            	}
+            	if(buildingType[i][ii] == 42) {
+            		population += 1;
+            	}
+            }
+        }
+        
+        if(population<4) {
+        	dialogue = 5;
+			gameState = 2;
+			lastGameState = 3;
+			storylineState = 2;
+        }
+        
+        //WIN
+        if(population>1000 && gdp>400000) {
+        	dialogue = 7;
+			gameState = 2;
+			lastGameState = 3;
+			storylineState = 4;
+        }
+        
+        
+	}
+
+	
+	public static void addMoney(){
+        for(int i = 0; i<24; i++) {
+        	for(int ii = 0; ii<17; ii++) {
+        		if(buildingType[i][ii] == 7) {
+            		money += (int)(8*Math.random());
+            	}
+            	if(buildingType[i][ii] == 27) {
+            		money += (int)(15*Math.random());
+            	}
+            	if(buildingType[i][ii] == 57) {
+            		money -= (int)(6*Math.random());
+            	}
+            }
+        }
+        
+	}
+
+	public static void abandon() {
+		
+		double townHallMultiplier = 0.995;
+		
+		//Check for town hall
+		for(int i = 0; i<24; i++) {
+			for(int ii = 0; ii<17; ii++) {
+	    		if(buildingType[i][ii] == 8 && (buildingType[i+1][ii] == 3 || buildingType[i+1][ii] == 4 || buildingType[i-1][ii] == 3 || buildingType[i-1][ii] == 4 || buildingType[i][ii+1] == 3 || buildingType[i][ii+1] == 4 || buildingType[i][ii-1] == 3 || buildingType[i][ii-1] == 4)) {
+	    			townHallMultiplier = 0.999;
+	    		}
+	    	}
+		}
+		for(int i = 0; i<24; i++) {
+			for(int ii = 0; ii<17; ii++) {
+	    		if(buildingType[i][ii] == 2 || buildingType[i][ii] == 7) {
+	    			//Road Check + Randomizer
+	    			if(buildingType[i+1][ii] != 3 && buildingType[i+1][ii] != 4 && buildingType[i-1][ii] != 3 && buildingType[i-1][ii] != 4 && buildingType[i][ii+1] != 3 && buildingType[i][ii+1] != 4 && buildingType[i][ii-1] != 3 && buildingType[i][ii-1] != 4 && Math.random()>0.001 && Math.random()>0.999999 && Math.random()>townHallMultiplier) {
+	    				buildingType[i][ii] += 50;
+	    			}
+	    			if(Math.random()>0.0001 && Math.random()>0.999999 && Math.random()>townHallMultiplier) {
+	    				buildingType[i][ii] += 50;
+	    			}
+	    		}
+	    	}
+		}
+	}
+
+	public static void finishGame() {
+		gameState = 3;
+		storylineState = 5;
+		
+		for(int i = 0; i<24;i++) {
+			for(int ii = 0; ii<17;ii++) {
+				buildingType[i][ii] = 9;
+				
+			}
+		}
+	}
+	
 	public static void naturalDisaster() {
+		abandon();
 		buildingType[tornadox][tornadoy] = 9;
-		if(Math.random()>0.001 && Math.random()>0.995 && !tornadoActive && gameState == 3) {
+		if(Math.random()>0.001 && Math.random()>0.99999 && !tornadoActive && gameState == 3) {
 			tornadoActive = true;
 			tornado();
 		}
@@ -768,17 +1031,16 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 	}
 	
 	public static void tornado() {
-		System.out.println("a tornado is forming");
 		int tornadox = (int) Math.round(Math.random()*23);
 		int tornadoy = (int) Math.round(Math.random()*16);
 		int tornadoDirection = (int)Math.round(Math.random()*4);
+		System.out.println("a " + tornadoDirection + " direction tornado is forming");
 		boolean destroy = false;
 		int lastBuildingType = 0;
-		System.out.println(tornadoDirection);
 		countGDP();
 		buildingType[tornadox][tornadoy] = 9;
 		while(tornadoActive) {
-			int movement = (int) (Math.random()*300000000);
+			int movement = (int) (Math.random()*30000000);
 			//Certain Direction
 			if(movement>10 && movement <20) {
 				movement = tornadoDirection + 1;
@@ -792,6 +1054,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 				}
 				lastBuildingType = buildingType[tornadox][tornadoy];
 				buildingType[tornadox][tornadoy] = 9;
+				addMoney();
 			}
 			else if(movement == 3 && tornadox < 24) {
 				tornadox += 1;
@@ -801,6 +1064,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 				}
 				lastBuildingType = buildingType[tornadox][tornadoy];
 				buildingType[tornadox][tornadoy] = 9;
+				addMoney();
 			}
 			else if(movement == 4 && tornadoy > 0) {
 				tornadoy -= 1;
@@ -810,6 +1074,7 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 				}
 				lastBuildingType = buildingType[tornadox][tornadoy];
 				buildingType[tornadox][tornadoy] = 9;
+				addMoney();
 			}
 			else if(movement == 5 && tornadoy < 17) {
 				tornadoy += 1;
@@ -819,16 +1084,29 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 				}
 				lastBuildingType = buildingType[tornadox][tornadoy];
 				buildingType[tornadox][tornadoy] = 9;
+				addMoney();
 			}
 			
+			
+			if(lastBuildingType == 8) {
+				dialogue = 5;
+				gameState = 2;
+				lastGameState = 3;
+				storylineState = 2;
+			}
 			if(lastBuildingType == 1 || Math.random()<0.5) {
 				destroy = false;
+			}
+			//Reinforced Buildings
+			else if(lastBuildingType > 20 & lastBuildingType < 30 && Math.random()<0.2) {
+				destroy = true;
 			}
 			else {
 				destroy = true;
 			}
 			//Cancel Tornado
-			if(tornadox<=0 || tornadox == 24 || tornadoy <= 0 || tornadoy == 17) {
+			abandon();
+			if(tornadox<=0 || tornadox == 24 || tornadoy <= 0 || tornadoy == 17 || (lastBuildingType==10 && Math.random()<0.8)) {
 				tornadoActive = false;
 				buildingType[tornadox][tornadoy] = 0;
 				tornadox = 0;
@@ -848,9 +1126,6 @@ public class Final_Project extends JPanel implements KeyListener, Runnable, Mous
 
             // 2) Drawing screen
             repaint();
-            
-            //Game Mechanics
-            //Recount the net worth
             
             
         }

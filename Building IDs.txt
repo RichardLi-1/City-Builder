@@ -1,0 +1,24 @@
+Building Type IDs
+0: Empty
+1: Locked
+2: House ($1000)
+3: Horizontal Road
+4: Vertical Road
+7: Coffee Shop ($1000)
+8: Town Hall ($10000)
+9: Tornado
+10: Tornado Wall ($20000)
+
+22: Reinforced House ($2000)
+27: Reinforced Coffee Shop ($2000)
+
+42: Kailyn’s House ($1000)
+
+52: House (Abandoned) ($200)
+57: Coffee Shop (Abandoned) ($200 worth)
+
+Cloud IDs
+0: Top
+1: Right
+2: Bottom
+3: Left
